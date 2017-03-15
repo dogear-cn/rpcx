@@ -93,19 +93,19 @@ func (s *ConsulClientSelector) start() {
 }
 
 func (s *ConsulClientSelector) pullServers() {
-	agent := s.client.Agent()
-	ass, err := agent.Services()
-
+	rsp, _, err := s.client.Health().Service(s.ServiceName, "", true, nil)
 	if err != nil {
 		return
 	}
 
 	var services []*api.AgentService
-	for k, v := range ass {
-		if strings.HasPrefix(k, s.ServiceName) {
-			services = append(services, v)
+
+	for _, r := range rsp {
+		if strings.HasPrefix(r.Service.Service, s.ServiceName) {
+			services = append(services, r.Service)
 		}
 	}
+
 	s.Servers = services
 	s.len = len(services)
 }
